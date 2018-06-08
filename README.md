@@ -7,7 +7,7 @@ This is a docker container for the Jupyter.
 
 ```
 $ docker pull panguolin/jupyter
-$ docker run -it -p 8888:8888 -v /path/to/your/notebooks:/notebooks panguolin/jupyter
+$ docker run -it -e PASSWORD=<your_password> -p 8888:8888 -v /path/to/your/notebooks:/notebooks panguolin/jupyter
 ```
 
 

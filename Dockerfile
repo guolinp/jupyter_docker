@@ -1,39 +1,30 @@
 FROM ubuntu:18.10
 
-MAINTAINER PanGuolin
+MAINTAINER "Pan Guolin"
 
-ENV LANGUAGE en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LC_ALL en_US.UTF-8
+RUN mkdir -p /notebooks
+
+ENV TINI_VERSION v0.6.0
 ENV PYTHONIOENCODING UTF-8
 ENV PYTHON_PATH /usr/bin/python3
-
-USER root
+ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get clean && apt-get upgrade -y && apt-get update -y --fix-missing
+RUN apt-get -y install git python3 python3-dev curl
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq python3 python3-dev
-
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq \
-        libatlas-base-dev libatlas-base-dev liblapack-dev gfortran build-essential gcc \
-        curl libcurl4-openssl-dev \
-        pkg-config libpng-dev libfreetype6 libfreetype6-dev
+# slim down image
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/man/?? /usr/share/man/??_*
 
 RUN curl -O https://bootstrap.pypa.io/get-pip.py && python3 get-pip.py
 
-RUN pip3 install matplotlib ipython ipykernel ipywidgets jupyter && \
-        python3 -m ipykernel.kernelspec
+RUN pip3 install matplotlib ipython ipykernel ipywidgets ipyparallel jupyter && python3 -m ipykernel.kernelspec
 
-RUN mkdir -p -m 700 /root/.jupyter/ && \
-    echo "c.NotebookApp.ip = '*'" >> /root/.jupyter/jupyter_notebook_config.py
+RUN mkdir -p -m 700 /root/.jupyter/ && echo "c.NotebookApp.ip = '*'" >> /root/.jupyter/jupyter_notebook_config.py
 
-VOLUME /notebooks
-WORKDIR /notebooks
-
-#ENV TINI_VERSION v0.6.0
-#ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
-#RUN chmod +x /usr/bin/tini
-#ENTRYPOINT ["/usr/bin/tini", "--"]
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
+RUN chmod +x /usr/bin/tini
+ENTRYPOINT ["/usr/bin/tini", "--"]
 
 EXPOSE 8888
-CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--allow-root"]
+WORKDIR /notebooks
+CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--allow-root", "--ip=0.0.0.0", "--notebook-dir=/notebooks"]

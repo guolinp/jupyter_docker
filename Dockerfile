@@ -1,37 +1,32 @@
-FROM ubuntu:18.10
+FROM panguolin/ubuntu
 
 MAINTAINER "Pan Guolin"
 
 RUN mkdir -p /notebooks
 
-ENV PYTHONIOENCODING UTF-8
-ENV PYTHON_PATH /usr/bin/python3
-ENV DEBIAN_FRONTEND noninteractive
-
 RUN apt-get clean && apt-get upgrade -y && apt-get update -y --fix-missing
 
 RUN apt-get -y install \
-        git \
-        python3 \
-        python3-dev \
-        curl
+        pandoc \
+        texlive-xetex
 
 # slim down image
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/man/?? /usr/share/man/??_*
 
-RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
-        python3 get-pip.py && \
-        rm -rf get-pip.py
-
 RUN pip3 --no-cache-dir install \
         numpy \
         pandas \
+        scipy \
+        sklearn \
         matplotlib \
+        graphviz \
         ipython \
         ipykernel \
         ipywidgets \
         ipyparallel \
         jupyter \
+        nbconvert \
+        pyzmq \
         && \
     python3 -m ipykernel.kernelspec
 
